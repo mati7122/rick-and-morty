@@ -12,7 +12,7 @@ function Home() {
 
     const [state, setState] = useState();
 
-    const { register, handleSubmit } = useForm();
+    const { register, handleSubmit, formState: { errors } } = useForm();
 
     const fetch = async (name, status) => {
         const resp = await axios.get(uri + name + stateUri + status).then(res => res).catch(() => "no-data")
@@ -39,25 +39,29 @@ function Home() {
 
     return (
         <>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <input {...register("name", { required: true })} />
-                {/* {errors.name && <span>Required</span>} */}
+            <div>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <input {...register("name", { required: true })} />
 
-                <select {...register("status")} defaultValue="all">
-                    <option value="all">All</option>
-                    <option value="alive">Alive</option>
-                    <option value="dead">Dead</option>
-                    <option value="unknown">Unknown</option>
-                </select>
+                    <select {...register("status")} defaultValue="all">
+                        <option value="all">All</option>
+                        <option value="alive">Alive</option>
+                        <option value="dead">Dead</option>
+                        <option value="unknown">Unknown</option>
+                    </select>
 
-                <input id="submitBtn" value="FILTER" type="submit" />
-            </form>
+                    <input id="submitBtn" value="FILTER" type="submit" />
+
+                </form>
+                {errors.name && <h2 id="required-field">Wait, this field is required!</h2>}
+            </div>
 
             {!state &&
                 <div className="wait">
                     <div id="waitImg"></div>
                 </div>
             }
+
 
             {state === 'no-data' &&
                 <div className="no-data">
@@ -69,10 +73,10 @@ function Home() {
 
             {state && state !== 'no-data' &&
                 <div className="list">
-                {state.map(i => {
-                    return (<Character img={i.image} name={i.name} status={i.status} specie={i.species} />)
-                        }
-                )}
+                    {state.map(i => {
+                        return (<Character key={i.name} img={i.image} name={i.name} status={i.status} specie={i.species} />)
+                    }
+                    )}
                 </div>
             }
 
