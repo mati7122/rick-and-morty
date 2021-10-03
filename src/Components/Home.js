@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import MortGif from '../assets/morty.gif';
 
 //Components
 import Character from './Character';
@@ -14,13 +15,19 @@ function Home() {
     const { register, handleSubmit } = useForm();
 
     const fetch = async (name, status) => {
-        const resp = await axios.get(uri + name + stateUri + status)
-        setState(resp.data.results);
+        const resp = await axios.get(uri + name + stateUri + status).then(res => res).catch(() => "no-data")
+        if (resp === "no-data")
+            setState(resp)
+        else
+            setState(resp.data.results);
     }
 
     const fetchAll = async (name) => {
-        const resp = await axios.get(uri + name)
-        setState(resp.data.results);
+        const resp = await axios.get(uri + name).then(res => res).catch(() => "no-data")
+        if (resp === "no-data")
+            setState(resp)
+        else
+            setState(resp.data.results);
     }
 
     const onSubmit = data => {
@@ -31,10 +38,10 @@ function Home() {
     }
 
     return (
-        <section>
-
+        <>
             <form onSubmit={handleSubmit(onSubmit)}>
-                <input {...register("name")} />
+                <input {...register("name", { required: true })} />
+                {/* {errors.name && <span>Required</span>} */}
 
                 <select {...register("status")} defaultValue="all">
                     <option value="all">All</option>
@@ -43,20 +50,33 @@ function Home() {
                     <option value="unknown">Unknown</option>
                 </select>
 
-                <input value="filter" type="submit" />
+                <input id="submitBtn" value="FILTER" type="submit" />
             </form>
 
-            {!state && <h2>No hay datos para mostrar</h2>}
-
-            {state?.map(i => {
-                return (
-                    <Character img={i.image} name={i.name} status={i.status} specie={i.species} />
-                );
-
-            })
+            {!state &&
+                <div className="wait">
+                    <div id="waitImg"></div>
+                </div>
             }
 
-        </section>
+            {state === 'no-data' &&
+                <div className="no-data">
+                    <h2>No results :(</h2>
+                    <img src={MortGif} alt="mortyGif" />
+                </div>
+            }
+
+
+            {state && state !== 'no-data' &&
+                <div className="list">
+                {state.map(i => {
+                    return (<Character img={i.image} name={i.name} status={i.status} specie={i.species} />)
+                        }
+                )}
+                </div>
+            }
+
+        </>
     );
 }
 export default Home;
